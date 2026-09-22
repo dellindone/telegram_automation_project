@@ -18,7 +18,7 @@ class ReminderSendingService:
 
     @staticmethod
     def build_expiry_message(df: pd.DataFrame, expiry_date: date, reminder_days: int) -> str:
-        row = df[df.iloc[:, 0].astype(str).str.lower() == "message"]
+        row = df[df.iloc[:, 0].astype(str).str.lower() == "remainder message"]
         message_template = row.iloc[0, 1] if not row.empty else None
         return message_template.format(
             expiry_date=expiry_date,

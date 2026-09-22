@@ -9,13 +9,13 @@ async def remove_expired_users(sheets: GoogleSheetsClient, telegram: TelegramCli
     print()
     subscriptions_df = sheets.get_sheet_as_dataframe(SheetName.SUBSCRIPTIONS)
     members_df = sheets.get_sheet_as_dataframe(SheetName.MEMBERS)
-    reminders_df = sheets.get_sheet_as_dataframe(SheetName.REMINDERS)
+    reminder_config_df = sheets.get_sheet_as_dataframe(SheetName.REMINDER_CONFIG)
 
     updated_subscriptions_df, updated_members_df = (
         await ExpiredUserRemovalService.remove_expired_users(
             subscriptions_df=subscriptions_df,
             members_df=members_df,
-            reminders_df=reminders_df,
+            reminder_config_df=reminder_config_df,
             telegram=telegram,
         )
     )

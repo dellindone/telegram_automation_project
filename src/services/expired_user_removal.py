@@ -83,12 +83,18 @@ class ExpiredUserRemovalService:
     # ) -> pd.DataFrame:
     #     return reminders_df[reminders_df[ReminderColumn.SUBSCRIPTION_ID] != subscription_id].copy()
 
+    @staticmethod
+    def build_expiry_message(df: pd.DataFrame) -> str:
+        row = df[df.iloc[:, 0].astype(str).str.lower() == "expiry message"]
+        message_template = row.iloc[0, 1] if not row.empty else None
+        return message_template if message_template else "Your Telegram group subscription has expired and you have been removed from the group."
+
     @classmethod
     async def remove_expired_users(
         cls,
         subscriptions_df: pd.DataFrame,
         members_df: pd.DataFrame,
-        reminders_df: pd.DataFrame,
+        reminder_config_df: pd.DataFrame,
         telegram: TelegramClient,
     ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
@@ -105,6 +111,8 @@ class ExpiredUserRemovalService:
                 await telegram.remove_user(telegram_user_id)
                 cls.mark_removed(result_subscriptions, index)
                 cls.mark_member_inactive(result_members, subscription[SubscriptionColumn.MEMBER_ID],)
+                message = cls.build_expiry_message(reminder_config_df)
+                await telegram.send_message(telegram_user_id=telegram_user_id, message=message,)
                 # result_reminders = cls.remove_reminders(result_reminders,int(subscription[SubscriptionColumn.ID]),)
             except Exception as error:
                 cls.mark_removal_failed(result_subscriptions, index, error,)
