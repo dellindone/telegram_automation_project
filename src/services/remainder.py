@@ -82,6 +82,10 @@ class ReminderService:
             next_reminder_id += 1
         return (new_reminders, next_reminder_id,)
 
+    @staticmethod
+    def build_result(reminders: list[dict]) -> pd.DataFrame:
+        return pd.DataFrame(reminders)
+
     @classmethod
     def create_reminders(cls, subscriptions_df: pd.DataFrame,
         reminders_df: pd.DataFrame, reminder_config_df: pd.DataFrame,
@@ -106,5 +110,5 @@ class ReminderService:
                     f"{subscription_id}: "
                     f"{error}"
                 )
-        return pd.DataFrame(new_reminders)
+        return cls.build_result(new_reminders)
     

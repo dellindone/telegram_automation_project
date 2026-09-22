@@ -5,3 +5,5 @@ pydantic
 pydantic-settings
 python-dotenv
 telethon
+pytest
+pytest-asyncio

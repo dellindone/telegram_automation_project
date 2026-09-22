@@ -54,7 +54,7 @@ class ReminderSendingService:
                 result_df.at[index, ReminderColumn.SENT_AT] = datetime.now()
             except Exception as error:
                 result_df.at[index, ReminderColumn.STATUS] = "failed"
-                result_df.at[index, ReminderColumn.LAST_ERROR] = str(error)
+                result_df.at[index, ReminderColumn.ERROR] = str(error)
 
         return result_df
     
