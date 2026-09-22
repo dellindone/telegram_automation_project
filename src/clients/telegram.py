@@ -1,0 +1,24 @@
+from telethon import TelegramClient as TelethonClient
+
+from src.config.settings import settings
+
+
+class TelegramClient:
+
+    def __init__(self):
+        self.client = TelethonClient(
+            "telegram_session",
+            settings.telegram_api_id,
+            settings.telegram_api_hash,
+        )
+        self.group_id = settings.telegram_group_id
+
+    async def send_message(self, telegram_user_id: int, message: str) -> None:
+        await self.client.send_message(telegram_user_id, message,)
+
+    async def remove_user(self, telegram_user_id: int) -> None:
+        group = await self.client.get_entity(self.group_id)
+        user = await self.client.get_entity(telegram_user_id)
+
+        await self.client.kick_participant(group,user,)
+        

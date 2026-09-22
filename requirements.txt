@@ -1,0 +1,7 @@
+pandas
+gspread
+google-auth
+pydantic
+pydantic-settings
+python-dotenv
+telethon
