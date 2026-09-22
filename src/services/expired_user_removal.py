@@ -19,13 +19,11 @@ class ExpiredUserRemovalService:
 
     @staticmethod
     def get_expired_subscriptions(subscriptions_df: pd.DataFrame) -> pd.DataFrame:
-        if subscriptions_df.empty:
-            return subscriptions_df
+        if subscriptions_df.empty: return subscriptions_df
 
         today = date.today()
         expiry_dates = pd.to_datetime(
-            subscriptions_df[SubscriptionColumn.EXPIRY_DATE],
-            errors="coerce",
+            subscriptions_df[SubscriptionColumn.EXPIRY_DATE], errors="coerce",
         ).dt.date
 
         return subscriptions_df[
@@ -78,14 +76,12 @@ class ExpiredUserRemovalService:
         df.at[index, SubscriptionColumn.STATUS] = "removal_failed"
         df.at[index, SubscriptionColumn.UPDATED_AT] = timestamp
 
-    @staticmethod
-    def remove_reminders(
-        reminders_df: pd.DataFrame,
-        subscription_id: int,
-    ) -> pd.DataFrame:
-        return reminders_df[
-            reminders_df[ReminderColumn.SUBSCRIPTION_ID] != subscription_id
-        ].copy()
+    # @staticmethod
+    # def remove_reminders(
+    #     reminders_df: pd.DataFrame,
+    #     subscription_id: int,
+    # ) -> pd.DataFrame:
+    #     return reminders_df[reminders_df[ReminderColumn.SUBSCRIPTION_ID] != subscription_id].copy()
 
     @classmethod
     async def remove_expired_users(
@@ -98,36 +94,20 @@ class ExpiredUserRemovalService:
 
         result_subscriptions = subscriptions_df.copy()
         result_members = members_df.copy()
-        result_reminders = reminders_df.copy()
+        # result_reminders = reminders_df.copy()
 
-        expired_subscriptions = cls.get_expired_subscriptions(
-            result_subscriptions
-        )
+        expired_subscriptions = cls.get_expired_subscriptions(result_subscriptions)
 
         for index, subscription in expired_subscriptions.iterrows():
             try:
                 cls.mark_removal_pending(result_subscriptions, index)
-
-                telegram_user_id = cls.get_telegram_user_id(
-                    subscription,
-                    result_members,
-                )
-
+                telegram_user_id = cls.get_telegram_user_id(subscription, result_members,)
                 await telegram.remove_user(telegram_user_id)
                 cls.mark_removed(result_subscriptions, index)
                 cls.mark_member_inactive(result_members, subscription[SubscriptionColumn.MEMBER_ID],)
-
-                result_reminders = cls.remove_reminders(result_reminders,int(subscription[SubscriptionColumn.ID]),)
-
+                # result_reminders = cls.remove_reminders(result_reminders,int(subscription[SubscriptionColumn.ID]),)
             except Exception as error:
-                cls.mark_removal_failed(
-                    result_subscriptions,
-                    index,
-                    error,
-                )
-
-        return (
-            result_subscriptions,
-            result_members,
-            result_reminders,
-        )
+                cls.mark_removal_failed(result_subscriptions, index, error,)
+        return (result_subscriptions, result_members, 
+                # result_reminders,
+            )

@@ -17,8 +17,14 @@ class ReminderSendingService:
         return reminders_df[(reminders_df[ReminderColumn.STATUS] == "pending") & (scheduled_dates <= today)]
 
     @staticmethod
-    def build_expiry_message(expiry_date, reminder_days: int) -> str:
-        return f"Your Telegram group subscription will expire in {reminder_days} day(s) on {expiry_date}."
+    def build_expiry_message(df: pd.DataFrame, expiry_date: date, reminder_days: int) -> str:
+        row = df[df.iloc[:, 0].astype(str).str.lower() == "message"]
+        message_template = row.iloc[0, 1] if not row.empty else None
+        return message_template.format(
+            expiry_date=expiry_date,
+            reminder_days=reminder_days) if message_template else \
+                f"Your Telegram group subscription will expire in {reminder_days} day(s) on {expiry_date}."
+        # return f"Your Telegram group subscription will expire in {reminder_days} day(s) on {expiry_date}."
 
     @staticmethod
     def get_telegram_user_id(subscription: pd.Series, members_df: pd.DataFrame) -> int:
@@ -32,6 +38,7 @@ class ReminderSendingService:
     async def send_due_reminders(
         cls, reminders_df: pd.DataFrame,
         subscriptions_df: pd.DataFrame, members_df: pd.DataFrame,
+        config_df: pd.DataFrame,
         telegram: TelegramClient,
     ) -> pd.DataFrame:
         result_df = reminders_df.copy()
@@ -45,23 +52,16 @@ class ReminderSendingService:
 
                 subscription = subscription.iloc[0]
                 telegram_user_id = cls.get_telegram_user_id(subscription, members_df)
-
                 message = cls.build_expiry_message(
+                    df=config_df,
                     expiry_date=subscription[SubscriptionColumn.EXPIRY_DATE],
                     reminder_days=int(reminder[ReminderColumn.REMINDER_DAYS]),
                 )
-
-                await telegram.send_message(
-                    telegram_user_id=telegram_user_id,
-                    message=message,
-                )
-
+                await telegram.send_message(telegram_user_id=telegram_user_id, message=message,)
                 result_df.at[index, ReminderColumn.STATUS] = "sent"
                 result_df.at[index, ReminderColumn.SENT_AT] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
             except Exception as error:
                 result_df.at[index, ReminderColumn.STATUS] = "failed"
                 result_df.at[index, ReminderColumn.ERROR] = str(error)
-
         return result_df
     

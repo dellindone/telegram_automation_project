@@ -22,10 +22,7 @@ class GoogleSheetsClient:
         print("Connected to Google Sheets.")
 
     def _create_client(self) -> gspread.Client:
-        credentials = Credentials.from_service_account_file(
-            settings.google_credentials_file,
-            scopes=self.SCOPES,
-        )
+        credentials = Credentials.from_service_account_file(settings.google_credentials_file, scopes=self.SCOPES,)
         return gspread.authorize(credentials)
 
     def _get_sheet(self) -> gspread.Worksheet:
@@ -67,15 +64,9 @@ class GoogleSheetsClient:
                 cell_row = row_index + 2
                 cell_column = column_index + 1
 
-                updates.append(
-                    {
-                        "range": gspread.utils.rowcol_to_a1(
-                            cell_row,
-                            cell_column,
-                        ),
-                        "values": [
-                            ["" if new_empty else str(new_value)]
-                        ],
+                updates.append({
+                        "range": gspread.utils.rowcol_to_a1(cell_row, cell_column,),
+                        "values": [["" if new_empty else str(new_value)]],
                     }
                 )
 

@@ -89,9 +89,7 @@ class ReminderService:
         new_reminders = []
 
         for _, config in enabled_configs.iterrows():
-            reminder_days = int(
-                config[ReminderConfigColumn.REMINDER_DAYS]
-            )
+            reminder_days = int(config[ReminderConfigColumn.REMINDER_DAYS])
 
             if cls.reminder_exists(
                 reminders_df=reminders_df,
@@ -99,24 +97,19 @@ class ReminderService:
                 reminder_days=reminder_days,
             ):
                 continue
-
             scheduled_date = expiry_date - timedelta(days=reminder_days)
-
             reminder = cls.build_reminder(
                 reminder_id=next_reminder_id,
                 subscription_id=subscription_id,
                 reminder_days=reminder_days,
                 scheduled_date=scheduled_date,
             )
-
             new_reminders.append(reminder)
             next_reminder_id += 1
-
         return new_reminders, next_reminder_id
 
     @staticmethod
-    def build_result(reminders: list[dict]) -> pd.DataFrame:
-        return pd.DataFrame(reminders)
+    def build_result(reminders: list[dict]) -> pd.DataFrame: return pd.DataFrame(reminders)
 
     @classmethod
     def create_reminders(
@@ -127,9 +120,7 @@ class ReminderService:
     ) -> pd.DataFrame:
 
         enabled_configs = cls.get_enabled_configs(reminder_config_df)
-
-        if enabled_configs.empty:
-            return cls.build_result([])
+        if enabled_configs.empty: return cls.build_result([])
 
         next_reminder_id = cls.get_next_reminder_id(reminders_df)
         new_reminders = []
@@ -145,15 +136,12 @@ class ReminderService:
                 new_reminders.extend(reminders)
 
             except Exception as error:
-                subscription_id = subscription.get(
-                    SubscriptionColumn.ID,
-                    "unknown",
-                )
+                subscription_id = subscription.get(SubscriptionColumn.ID, "unknown",)
                 print(
                     f"Failed to process "
                     f"subscription "
                     f"{subscription_id}: "
                     f"{error}"
                 )
-
         return cls.build_result(new_reminders)
+    

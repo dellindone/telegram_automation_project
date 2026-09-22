@@ -56,20 +56,15 @@ class SubscriptionService:
 
                 for column, new_value in result.items():
                     old_value = result_df.at[index, column]
-
-                    if pd.isna(old_value) and pd.isna(new_value):
-                        continue
-
+                    if pd.isna(old_value) and pd.isna(new_value): continue
                     if str(old_value) != str(new_value):
                         result_df.at[index, column] = new_value
                         row_changed = True
 
                 if row_changed:
                     result_df.at[index, SubscriptionColumn.UPDATED_AT] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
                 del result
                 gc.collect()
-
             except Exception as error:
                 cls.append_error(df=result_df, index=index, error=error)
 
