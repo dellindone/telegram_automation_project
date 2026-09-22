@@ -41,7 +41,9 @@ async def remove_expired_users(sheets: GoogleSheetsClient, telegram: TelegramCli
 async def main():
     sheets = GoogleSheetsClient()
     telegram = TelegramClient()
+    await telegram.connect()
     await remove_expired_users(sheets, telegram)
+    await telegram.disconnect()
 
 if __name__ == "__main__":
     asyncio.run(main())

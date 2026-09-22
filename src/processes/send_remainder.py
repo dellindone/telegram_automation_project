@@ -27,7 +27,9 @@ async def send_reminders(sheets: GoogleSheetsClient, telegram: TelegramClient) -
 async def main():
     sheets = GoogleSheetsClient()
     telegram = TelegramClient()
+    await telegram.connect()
     await send_reminders(sheets, telegram)
+    await telegram.disconnect()
 
 if __name__ == "__main__":
     asyncio.run(main())

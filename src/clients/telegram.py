@@ -13,6 +13,14 @@ class TelegramClient:
         )
         self.group_id = settings.telegram_group_id
 
+    async def connect(self) -> None:
+        if not self.client.is_connected():
+            await self.client.start()
+
+    async def disconnect(self) -> None:
+        if self.client.is_connected():
+            await self.client.disconnect()
+
     async def ensure_connected(self) -> None:
         if not self.client.is_connected():
             await self.client.connect()
@@ -26,4 +34,3 @@ class TelegramClient:
         group = await self.client.get_entity(self.group_id)
         user = await self.client.get_entity(telegram_user_id)
         await self.client.kick_participant(group, user)
-        
