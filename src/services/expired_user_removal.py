@@ -22,9 +22,7 @@ class ExpiredUserRemovalService:
         if subscriptions_df.empty: return subscriptions_df
 
         today = date.today()
-        expiry_dates = pd.to_datetime(
-            subscriptions_df[SubscriptionColumn.EXPIRY_DATE], errors="coerce",
-        ).dt.date
+        expiry_dates = pd.to_datetime(subscriptions_df[SubscriptionColumn.EXPIRY_DATE], errors="coerce",).dt.date
 
         return subscriptions_df[
             (subscriptions_df[SubscriptionColumn.STATUS] == "active")
@@ -33,15 +31,11 @@ class ExpiredUserRemovalService:
 
     @staticmethod
     def get_telegram_user_id(
-        subscription: pd.Series,
-        members_df: pd.DataFrame,
-    ) -> int:
+        subscription: pd.Series, members_df: pd.DataFrame,) -> int:
         member_id = subscription[SubscriptionColumn.MEMBER_ID]
         member = members_df[members_df[MemberColumn.ID] == member_id]
 
-        if member.empty:
-            raise ValueError(f"Member {member_id} not found.")
-
+        if member.empty: raise ValueError(f"Member {member_id} not found.")
         return int(member.iloc[0][MemberColumn.TELEGRAM_USER_ID])
 
     @staticmethod

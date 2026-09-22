@@ -1,4 +1,7 @@
+import asyncio
+
 from telethon import TelegramClient as TelethonClient
+from telethon.errors import FloodWaitError
 
 from src.config.settings import settings
 
@@ -27,10 +30,18 @@ class TelegramClient:
 
     async def send_message(self, telegram_user_id: int, message: str) -> None:
         await self.ensure_connected()
-        await self.client.send_message(telegram_user_id, message)
+        await asyncio.sleep(0.4)
+
+        try:
+            await self.client.send_message(telegram_user_id, message)
+        except FloodWaitError as error:
+            print(f"Telegram FloodWait: {error.seconds}s")
+            await asyncio.sleep(error.seconds)
+            await self.client.send_message(telegram_user_id, message)
 
     async def remove_user(self, telegram_user_id: int) -> None:
         await self.ensure_connected()
         group = await self.client.get_entity(self.group_id)
         user = await self.client.get_entity(telegram_user_id)
         await self.client.kick_participant(group, user)
+    
