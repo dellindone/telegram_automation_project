@@ -40,7 +40,9 @@ class ReminderSendingService:
         for index, reminder in due_reminders.iterrows():
             try:
                 subscription = subscriptions_df[subscriptions_df[SubscriptionColumn.ID] == reminder[ReminderColumn.SUBSCRIPTION_ID]]
-                if subscription.empty: raise ValueError("Subscription not found.")
+                if subscription.empty:
+                    raise ValueError("Subscription not found.")
+
                 subscription = subscription.iloc[0]
                 telegram_user_id = cls.get_telegram_user_id(subscription, members_df)
 
@@ -49,9 +51,14 @@ class ReminderSendingService:
                     reminder_days=int(reminder[ReminderColumn.REMINDER_DAYS]),
                 )
 
-                await telegram.send_message(telegram_user_id=telegram_user_id, message=message,)
+                await telegram.send_message(
+                    telegram_user_id=telegram_user_id,
+                    message=message,
+                )
+
                 result_df.at[index, ReminderColumn.STATUS] = "sent"
-                result_df.at[index, ReminderColumn.SENT_AT] = datetime.now()
+                result_df.at[index, ReminderColumn.SENT_AT] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
             except Exception as error:
                 result_df.at[index, ReminderColumn.STATUS] = "failed"
                 result_df.at[index, ReminderColumn.ERROR] = str(error)
