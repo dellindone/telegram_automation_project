@@ -17,5 +17,5 @@ class Reminder(BaseModel):
     scheduled_date: date
     sent_at: date | None = None
     status: ReminderStatus = ReminderStatus.PENDING
-    last_error: str | None = None
+    error: str | None = None
     
