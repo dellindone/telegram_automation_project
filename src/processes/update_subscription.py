@@ -17,6 +17,7 @@ def update_subscriptions(sheets: GoogleSheetsClient):
 def main():
     sheets = GoogleSheetsClient()
     update_subscriptions(sheets)
+    print("Subscription update process completed.")
 
 if __name__ == "__main__":
     main()

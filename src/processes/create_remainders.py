@@ -22,6 +22,7 @@ def create_reminders(sheets: GoogleSheetsClient) -> None:
 def main():
     sheets = GoogleSheetsClient()
     create_reminders(sheets)
+    print("Reminder creation process completed.")
 
 if __name__ == "__main__":
     main()

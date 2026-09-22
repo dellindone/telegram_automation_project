@@ -38,6 +38,7 @@ async def main():
     await telegram.connect()
     await remove_expired_users(sheets, telegram)
     await telegram.disconnect()
+    print("Expired user removal process completed.")
 
 if __name__ == "__main__":
     asyncio.run(main())
