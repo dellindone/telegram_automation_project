@@ -3,3 +3,4 @@ test.py
 *.json
 *.pyc
 .DS_Store
+telegram_session.session
