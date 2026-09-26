@@ -10,10 +10,10 @@ class SheetName(StrEnum):
 class MemberColumn(StrEnum):
     ID = "id"
     TELEGRAM_USER_ID = "telegram_user_id"
+    USERNAME = "username"
     NAME = "name"
     STATUS = "status"
     JOINED_DATE = "joined_date"
-
 
 class SubscriptionColumn(StrEnum):
     ID = "id"

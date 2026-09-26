@@ -32,6 +32,9 @@ class GoogleSheetsClient:
         print(f"Fetching data from sheet: {sheet_name}")
         worksheet = self.spreadsheet.worksheet(sheet_name)
         records = worksheet.get_all_records()
+        if not records:
+            headers = worksheet.row_values(1)
+            return pd.DataFrame(columns=headers)
         print(f"Fetched {len(records)} records from sheet: {sheet_name}")
         return pd.DataFrame(records)
 
@@ -80,3 +83,77 @@ class GoogleSheetsClient:
         values = df.fillna("").astype(str).values.tolist()
         worksheet.append_rows(values,value_input_option="USER_ENTERED",)
         print(f"Appended rows to sheet: {sheet_name}")
+
+    def sync_dataframe_to_sheet(
+        self, sheet_name: SheetName, old_df: pd.DataFrame,
+        new_df: pd.DataFrame, key_column: str,
+    ) -> None:
+        """
+        Diff old_df vs new_df by key_column and apply the minimal set of
+        changes to the sheet: cell updates for changed existing rows,
+        appended rows for new keys, and deleted rows for removed keys.
+        """
+        if list(old_df.columns) != list(new_df.columns):
+            raise ValueError("Old and new DataFrame must have the same columns.")
+
+        worksheet = self.spreadsheet.worksheet(sheet_name)
+        columns = list(old_df.columns)
+
+        old_keyed = old_df.set_index(old_df[key_column].astype(str), drop=False)
+        new_keyed = new_df.set_index(new_df[key_column].astype(str), drop=False)
+
+        old_keys = set(old_keyed.index)
+        new_keys = set(new_keyed.index)
+
+        common_keys = old_keys & new_keys
+        added_keys = new_keys - old_keys
+        removed_keys = old_keys - new_keys
+
+        # Map each key to its ORIGINAL sheet row number (based on old_df order)
+        key_to_sheet_row = {
+            str(key): idx + 2 for idx, key in enumerate(old_df[key_column])
+        }
+
+        # 1. Updates: same key, changed cells
+        cell_updates = []
+        for key in common_keys:
+            sheet_row = key_to_sheet_row[key]
+            old_row = old_keyed.loc[key]
+            new_row = new_keyed.loc[key]
+
+            for col_idx, column in enumerate(columns):
+                old_value = old_row[column]
+                new_value = new_row[column]
+
+                old_empty = pd.isna(old_value) or old_value == ""
+                new_empty = pd.isna(new_value) or new_value == ""
+
+                if old_empty and new_empty:
+                    continue
+                if str(old_value) == str(new_value):
+                    continue
+
+                cell_updates.append({
+                    "range": gspread.utils.rowcol_to_a1(sheet_row, col_idx + 1),
+                    "values": [["" if new_empty else str(new_value)]],
+                })
+
+        if cell_updates:
+            worksheet.batch_update(cell_updates)
+            print(f"Updated {len(cell_updates)} changed cells in sheet: {sheet_name}")
+
+        # 2. Appends: keys only in new_df
+        if added_keys:
+            new_rows_df = new_keyed.loc[list(added_keys), columns]
+            rows_to_append = new_rows_df.fillna("").astype(str).values.tolist()
+            worksheet.append_rows(rows_to_append)
+            print(f"Appended {len(rows_to_append)} new rows to sheet: {sheet_name}")
+
+        # 3. Deletions: keys only in old_df
+        if removed_keys:
+            rows_to_delete = sorted(
+                (key_to_sheet_row[key] for key in removed_keys), reverse=True
+            )
+            for row_num in rows_to_delete:
+                worksheet.delete_rows(row_num)
+            print(f"Deleted {len(rows_to_delete)} rows from sheet: {sheet_name}")

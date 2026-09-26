@@ -4,7 +4,7 @@ from telethon import TelegramClient as TelethonClient
 from telethon.errors import FloodWaitError
 
 from src.config.settings import settings
-
+from src.config.sheets import MemberColumn
 
 class TelegramClient:
 
@@ -44,4 +44,20 @@ class TelegramClient:
         group = await self.client.get_entity(self.group_id)
         user = await self.client.get_entity(telegram_user_id)
         await self.client.kick_participant(group, user)
+
+    async def get_group_participants(self) -> list:
+        await self.ensure_connected()
+        group = await self.client.get_entity(self.group_id)
+        participants = await self.client.get_participants(group)
+        members = []
+        for user in participants:
+            first_name = user.first_name or ""
+            last_name = user.last_name or ""
+
+            members.append({
+                    MemberColumn.TELEGRAM_USER_ID: user.id,
+                    MemberColumn.USERNAME: user.username or "",
+                    MemberColumn.NAME: f"{first_name} {last_name}".strip(),
+                })
+        return members
     

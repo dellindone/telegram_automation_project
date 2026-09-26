@@ -3,7 +3,6 @@ from src.services.remainder import ReminderService
 from src.config.sheets import SheetName
 
 def create_reminders(sheets: GoogleSheetsClient) -> None:
-    print()
     subscriptions_df = sheets.get_sheet_as_dataframe(SheetName.SUBSCRIPTIONS)
     reminders_df = sheets.get_sheet_as_dataframe(SheetName.REMINDERS)
     reminder_config_df = sheets.get_sheet_as_dataframe(SheetName.REMINDER_CONFIG)
@@ -20,6 +19,7 @@ def create_reminders(sheets: GoogleSheetsClient) -> None:
     sheets.append_rows(sheet_name=SheetName.REMINDERS, df=new_reminders_df)
 
 def main():
+    print()
     sheets = GoogleSheetsClient()
     create_reminders(sheets)
     print("Reminder creation process completed.")

@@ -3,10 +3,9 @@ import asyncio
 from src.clients.google_sheets import GoogleSheetsClient
 from src.clients.telegram import TelegramClient
 from src.services.remainder_sending import ReminderSendingService
-from src.config.sheets import SheetName
+from src.config.sheets import SheetName, SubscriptionColumn
 
 async def send_reminders(sheets: GoogleSheetsClient, telegram: TelegramClient) -> None:
-    print()
     reminders_df = sheets.get_sheet_as_dataframe(SheetName.REMINDERS)
     subscriptions_df = sheets.get_sheet_as_dataframe(SheetName.SUBSCRIPTIONS)
     members_df = sheets.get_sheet_as_dataframe(SheetName.MEMBERS)
@@ -20,13 +19,15 @@ async def send_reminders(sheets: GoogleSheetsClient, telegram: TelegramClient) -
         telegram=telegram,
     )
 
-    sheets.update_changed_rows(
+    sheets.sync_dataframe_to_sheet(
         sheet_name=SheetName.REMINDERS,
         old_df=reminders_df,
         new_df=updated_reminders_df,
+        key_column=SubscriptionColumn.ID
     )
 
 async def main():
+    print()
     sheets = GoogleSheetsClient()
     telegram = TelegramClient()
     await telegram.connect()
