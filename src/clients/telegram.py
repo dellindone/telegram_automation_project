@@ -1,6 +1,7 @@
 import asyncio
 
 from telethon import TelegramClient as TelethonClient
+from telethon.tl.functions.contacts import GetContactsRequest
 from telethon.errors import FloodWaitError
 
 from src.config.settings import settings
@@ -15,6 +16,12 @@ class TelegramClient:
             settings.telegram_api_hash,
         )
         self.group_id = settings.telegram_group_id
+
+
+    async def get_contacts(self):
+        await self.ensure_connected()
+        result = await self.client(GetContactsRequest(hash=0))
+        return result.users
 
     async def connect(self) -> None:
         if not self.client.is_connected():
@@ -49,7 +56,7 @@ class TelegramClient:
         await self.ensure_connected()
         group = await self.client.get_entity(self.group_id)
         participants = await self.client.get_participants(group)
-        contacts = await self.client.get_contacts()
+        contacts = await self.get_contacts()
         contact_phones = {user.id: user.phone or ""for user in contacts}
         members = []
         for user in participants:

@@ -103,6 +103,7 @@ class MembersUpdater:
             ],
             errors="ignore",
         )
+        merged = merged.sort_values(MemberColumn.ID)
         return merged[original_columns]
 
     @staticmethod
