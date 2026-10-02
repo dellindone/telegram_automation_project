@@ -49,16 +49,18 @@ class TelegramClient:
         await self.ensure_connected()
         group = await self.client.get_entity(self.group_id)
         participants = await self.client.get_participants(group)
+        contacts = await self.client.get_contacts()
+        contact_phones = {user.id: user.phone or ""for user in contacts}
         members = []
         for user in participants:
             first_name = user.first_name or ""
             last_name = user.last_name or ""
-
+            phone_number = user.phone or contact_phones.get(user.id, "")
             members.append({
                     MemberColumn.TELEGRAM_USER_ID: user.id,
                     MemberColumn.USERNAME: user.username or "",
                     MemberColumn.NAME: f"{first_name} {last_name}".strip(),
-                    MemberColumn.PHONE_NUMBER: user.phone or "",  
+                    MemberColumn.PHONE_NUMBER: phone_number,  
                 })
         return members
     
