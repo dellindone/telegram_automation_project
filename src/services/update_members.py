@@ -38,6 +38,7 @@ class MembersUpdater:
         username = MemberColumn.USERNAME
         name = MemberColumn.NAME
         status = MemberColumn.STATUS
+        phone_number = MemberColumn.PHONE_NUMBER
 
         existing_member = merged["_merge"] == "both"
 
@@ -50,7 +51,11 @@ class MembersUpdater:
             merged.loc[existing_member, f"{name}_telegram"]
             .fillna(merged.loc[existing_member, name])
         )
-
+        merged.loc[existing_member, phone_number] = (
+            merged.loc[existing_member, f"{phone_number}_telegram"]
+            .fillna(merged.loc[existing_member, phone_number])
+        )
+        
         inactive_reactivated = (
             existing_member
             & merged[status].fillna("").str.lower().eq("inactive")
