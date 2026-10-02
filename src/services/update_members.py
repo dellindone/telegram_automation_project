@@ -76,6 +76,7 @@ class MembersUpdater:
         merged.loc[new_member_mask, member_id] = range(max_id + 1, max_id + 1 + new_count)
         merged.loc[new_member_mask, status] = "new"
         merged.loc[new_member_mask, joined_date] = pd.Timestamp.now().strftime("%Y-%m-%d")
+        merged[member_id] = pd.to_numeric(merged[member_id], errors="coerce",).astype("Int64")
         return merged
 
     @staticmethod
