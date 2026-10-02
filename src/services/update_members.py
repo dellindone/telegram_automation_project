@@ -22,6 +22,7 @@ class MembersUpdater:
             MemberColumn.TELEGRAM_USER_ID,
             MemberColumn.USERNAME,
             MemberColumn.NAME,
+            MemberColumn.PHONE_NUMBER,
         ]
 
         return members_df.merge(
@@ -81,14 +82,17 @@ class MembersUpdater:
     def _cleanup_members(merged: pd.DataFrame, original_columns: pd.Index,) -> pd.DataFrame:
         username = MemberColumn.USERNAME
         name = MemberColumn.NAME
+        phone_number = MemberColumn.PHONE_NUMBER
 
         merged[username] = merged[username].fillna(merged[f"{username}_telegram"]).fillna("")
         merged[name] = merged[name].fillna(merged[f"{name}_telegram"]).fillna("")
+        merged[phone_number] = merged[phone_number].fillna(merged[f"{phone_number}_telegram"]).fillna("")
 
         merged = merged.drop(
             columns=[
                 f"{username}_telegram",
                 f"{name}_telegram",
+                f"{phone_number}_telegram",
                 "_merge",
             ],
             errors="ignore",
@@ -98,7 +102,6 @@ class MembersUpdater:
     @staticmethod
     async def update_members(members_df: pd.DataFrame, telegram: TelegramClient,) -> pd.DataFrame:
         members = await telegram.get_group_participants()
-
         if not members:
             print("No Telegram members found.")
             return members_df

@@ -58,6 +58,7 @@ class TelegramClient:
                     MemberColumn.TELEGRAM_USER_ID: user.id,
                     MemberColumn.USERNAME: user.username or "",
                     MemberColumn.NAME: f"{first_name} {last_name}".strip(),
+                    MemberColumn.PHONE_NUMBER: user.phone or "",  
                 })
         return members
     

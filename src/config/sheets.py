@@ -14,6 +14,7 @@ class MemberColumn(StrEnum):
     NAME = "name"
     STATUS = "status"
     JOINED_DATE = "joined_date"
+    PHONE_NUMBER = "phone_number"
 
 class SubscriptionColumn(StrEnum):
     ID = "id"
